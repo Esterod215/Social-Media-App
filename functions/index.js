@@ -12,10 +12,7 @@ admin.initializeApp({
 const express = require("express");
 const server = express();
 
-exports.getScreams = functions.https.onRequest((request, response) => {
-  if (request.method != "POST") {
-    return response.status(400).json({ error: "Method not allowed" });
-  }
+server.get("/screams", (req, res) => {
   admin
     .firestore()
     .collection("screams")
@@ -23,14 +20,20 @@ exports.getScreams = functions.https.onRequest((request, response) => {
     .then(data => {
       let screams = [];
       data.forEach(doc => {
-        screams.push(doc.data());
+        screams.push({
+          screamId: doc.id,
+          body: doc.data().body,
+          userHandle: doc.data().userHandle
+        });
       });
-      return response.json(screams);
+      return res.json(screams);
     })
     .catch(err => console.error(err));
 });
-
-exports.createScream = functions.https.onRequest((request, response) => {
+server.post("/screams", (request, response) => {
+  if (request.method != "POST") {
+    return response.status(400).json({ error: "Method not allowed" });
+  }
   const newScream = {
     body: request.body.body,
     userHandle: request.body.userHandle,
@@ -50,3 +53,5 @@ exports.createScream = functions.https.onRequest((request, response) => {
       console.error(err);
     });
 });
+
+exports.api = functions.https.onRequest(server);
