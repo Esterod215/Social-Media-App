@@ -90,7 +90,7 @@ server.post("/signup", (req, res) => {
     confirmPassword: req.body.confirmPassword,
     handle: req.body.handle
   };
-  let errors = {};
+  const errors = {};
   if (isEmpty(newUser.email)) {
     errors.email = "must not be empty";
   } else if (!isEmail(newUser.email)) {
@@ -147,6 +147,45 @@ server.post("/signup", (req, res) => {
         return res.status(500).json({ error: err.code });
       }
     });
+  //End signup route
+
+  //login route
+  server.post("/login", (req, res) => {
+    const userInfo = {
+      email: req.body.email,
+      password: req.body.password
+    };
+    let errors = {};
+    if (isEmpty(userInfo.email)) {
+      errors.email = "must not be empty";
+    }
+    if (isEmpty(userInfo.password)) {
+      errors.password = "must not be empty";
+    }
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json(errors);
+    }
+
+    firebase
+      .auth()
+      .signInWithEmailAndPassword(userInfo.email, userInfo.password)
+      .then(data => {
+        return data.user.getIdToken();
+      })
+      .then(token => {
+        return res.json({ token });
+      })
+      .catch(err => {
+        console.error(err);
+        if (err.code === "auth/wrong-password") {
+          return res
+            .status(403)
+            .json({ general: "wrong credentials, please try again" });
+        } else {
+          return res.status(500).json({ error: err.code });
+        }
+      });
+  });
 });
 
 exports.api = functions.https.onRequest(server);
