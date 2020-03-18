@@ -12,10 +12,25 @@ admin.initializeApp({
 const express = require("express");
 const server = express();
 
+const firebaseConfig = {
+  apiKey: "AIzaSyAszNSwxjhaIWuN-q6l02Q_g045qUUTOb0",
+  authDomain: "socialapp-2a20a.firebaseapp.com",
+  databaseURL: "https://socialapp-2a20a.firebaseio.com",
+  projectId: "socialapp-2a20a",
+  storageBucket: "socialapp-2a20a.appspot.com",
+  messagingSenderId: "542916886559",
+  appId: "1:542916886559:web:d10eb163b20189d08c552a",
+  measurementId: "G-8HMMLE9E9S"
+};
+
+const firebase = require("firebase");
+firebase.initializeApp(firebaseConfig);
+
+const db = admin.firestore();
+
 server.get("/screams", (req, res) => {
-  admin
-    .firestore()
-    .collection("screams")
+  db.collection("screams")
+    .orderBy("createdAt", "desc")
     .get()
     .then(data => {
       let screams = [];
@@ -23,7 +38,8 @@ server.get("/screams", (req, res) => {
         screams.push({
           screamId: doc.id,
           body: doc.data().body,
-          userHandle: doc.data().userHandle
+          userHandle: doc.data().userHandle,
+          createdAt: doc.data().createdAt
         });
       });
       return res.json(screams);
@@ -31,17 +47,12 @@ server.get("/screams", (req, res) => {
     .catch(err => console.error(err));
 });
 server.post("/screams", (request, response) => {
-  if (request.method != "POST") {
-    return response.status(400).json({ error: "Method not allowed" });
-  }
   const newScream = {
     body: request.body.body,
     userHandle: request.body.userHandle,
-    createdAt: admin.firestore.Timestamp.fromDate(new Date())
+    createdAt: new Date().toISOString()
   };
-  admin
-    .firestore()
-    .collection("screams")
+  db.collection("screams")
     .add(newScream)
     .then(doc => {
       response
@@ -51,6 +62,42 @@ server.post("/screams", (request, response) => {
     .catch(err => {
       response.status(500).json({ error: err });
       console.error(err);
+    });
+});
+
+//signup route
+server.post("/signup", (req, res) => {
+  const newUser = {
+    email: req.body.email,
+    password: req.body.password,
+    confirmPassword: req.body.confirmPassword,
+    handle: req.body.handle
+  };
+  //validate data
+  db.doc(`/users/${newUser.handle}`)
+    .get()
+    .then(doc => {
+      if (doc.exists) {
+        res.status(400).json({ handle: "this handle is already taken" });
+      } else {
+        return firebase
+          .auth()
+          .createUserWithEmailAndPassword(newUser.email, newUser.password);
+      }
+    })
+    .then(data => {
+      return data.user.getIdToken();
+    })
+    .then(token => {
+      return res.status(201).json({ token });
+    })
+    .catch(err => {
+      console.error(err);
+      if (err.code === "auth/email-already-in-use") {
+        return res.status(400).json({ email: "email already in use" });
+      } else {
+        return res.status(500).json({ error: err.code });
+      }
     });
 });
 
