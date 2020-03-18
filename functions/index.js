@@ -65,6 +65,15 @@ server.post("/screams", (request, response) => {
     });
 });
 
+//helper function to validate empty strings
+const isEmpty = string => {
+  if (string.trim() === "") {
+    return true;
+  } else {
+    return false;
+  }
+};
+
 //signup route
 server.post("/signup", (req, res) => {
   const newUser = {
