@@ -28,6 +28,43 @@ firebase.initializeApp(firebaseConfig);
 
 const db = admin.firestore();
 
+//middleware
+const FBAuth = (req, res, next) => {
+  let idToken;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer ")
+  ) {
+    idToken = req.headers.authorization.split("Bearer ")[1];
+    console.log(idToken);
+  } else {
+    console.error("could not find token");
+    return res.status(403).json({ error: "not authorized" });
+  }
+  admin
+    .auth()
+    .verifyIdToken(idToken)
+    .then(decodedToken => {
+      console.log("decToken", decodedToken);
+      console.log("req", req);
+      req.user = decodedToken;
+
+      return db
+        .collection("users")
+        .where("userId", "==", req.user.uid)
+        .limit(1)
+        .get();
+    })
+    .then(data => {
+      req.user.handle = data.docs[0].data().handle;
+      return next();
+    })
+    .catch(err => {
+      console.error(err);
+      return res.status(403).json({ error: "error while verifying token" });
+    });
+};
+
 server.get("/screams", (req, res) => {
   db.collection("screams")
     .orderBy("createdAt", "desc")
@@ -46,10 +83,10 @@ server.get("/screams", (req, res) => {
     })
     .catch(err => console.error(err));
 });
-server.post("/screams", (request, response) => {
+server.post("/screams", FBAuth, (request, response) => {
   const newScream = {
     body: request.body.body,
-    userHandle: request.body.userHandle,
+    userHandle: request.user.handle,
     createdAt: new Date().toISOString()
   };
   db.collection("screams")
@@ -147,45 +184,45 @@ server.post("/signup", (req, res) => {
         return res.status(500).json({ error: err.code });
       }
     });
-  //End signup route
+});
+//End signup route
 
-  //login route
-  server.post("/login", (req, res) => {
-    const userInfo = {
-      email: req.body.email,
-      password: req.body.password
-    };
-    let errors = {};
-    if (isEmpty(userInfo.email)) {
-      errors.email = "must not be empty";
-    }
-    if (isEmpty(userInfo.password)) {
-      errors.password = "must not be empty";
-    }
-    if (Object.keys(errors).length > 0) {
-      return res.status(400).json(errors);
-    }
+//login route
+server.post("/login", (req, res) => {
+  const userInfo = {
+    email: req.body.email,
+    password: req.body.password
+  };
+  let errors = {};
+  if (isEmpty(userInfo.email)) {
+    errors.email = "must not be empty";
+  }
+  if (isEmpty(userInfo.password)) {
+    errors.password = "must not be empty";
+  }
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json(errors);
+  }
 
-    firebase
-      .auth()
-      .signInWithEmailAndPassword(userInfo.email, userInfo.password)
-      .then(data => {
-        return data.user.getIdToken();
-      })
-      .then(token => {
-        return res.json({ token });
-      })
-      .catch(err => {
-        console.error(err);
-        if (err.code === "auth/wrong-password") {
-          return res
-            .status(403)
-            .json({ general: "wrong credentials, please try again" });
-        } else {
-          return res.status(500).json({ error: err.code });
-        }
-      });
-  });
+  firebase
+    .auth()
+    .signInWithEmailAndPassword(userInfo.email, userInfo.password)
+    .then(data => {
+      return data.user.getIdToken();
+    })
+    .then(token => {
+      return res.json({ token });
+    })
+    .catch(err => {
+      console.error(err);
+      if (err.code === "auth/wrong-password") {
+        return res
+          .status(403)
+          .json({ general: "wrong credentials, please try again" });
+      } else {
+        return res.status(500).json({ error: err.code });
+      }
+    });
 });
 
 exports.api = functions.https.onRequest(server);
