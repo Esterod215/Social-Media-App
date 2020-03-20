@@ -28,6 +28,7 @@ exports.FBAuth = (req, res, next) => {
     })
     .then(data => {
       req.user.handle = data.docs[0].data().handle;
+      console.log("passed auth");
       return next();
     })
     .catch(err => {
