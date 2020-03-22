@@ -12,6 +12,7 @@ exports.FBAuth = (req, res, next) => {
     console.error("could not find token");
     return res.status(403).json({ error: "not authorized" });
   }
+  console.log(idToken);
   admin
     .auth()
     .verifyIdToken(idToken)

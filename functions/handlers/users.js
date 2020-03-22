@@ -106,6 +106,10 @@ exports.uploadImage = (req, res) => {
   console.log("req.headers ", req.headers);
 
   busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
+    console.log(mimetype);
+    if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
+      return res.status(400).json({ error: "wrong file type submitted." });
+    }
     const imageExtension = filename.split(".")[filename.split(".").length - 1]; //.png .jpeg etc...
     imageFileName = `${Math.round(Math.random() * 10000000)}.${imageExtension}`;
     const filePath = path.join(os.tmpdir(), imageFileName);
@@ -135,7 +139,7 @@ exports.uploadImage = (req, res) => {
       })
       .then(() => {
         console.log("made it to the return message");
-        return res.status(201).json({ message: "Image uploaded Successfully" });
+        return res.json({ message: "Image uploaded Successfully" });
       })
       .catch(err => {
         console.log("entered catch");
