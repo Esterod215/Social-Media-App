@@ -71,6 +71,30 @@ exports.getScream = (req, res) => {
       return res.status(500).json({ error: err.message });
     });
 };
+//deletes a specific scream (post)
+exports.deleteScream = (req, res) => {
+  const screamDocument = db.doc(`screams/${req.params.screamId}`);
+  screamDocument
+    .get()
+    .then(doc => {
+      console.log(req.user);
+      if (!doc.exists) {
+        return res.status(404).json({ error: "scream not found" });
+      }
+      if (doc.data().userHandle !== req.user.handle) {
+        return res.status(403).json({ error: "Unauthorized" });
+      } else {
+        return screamDocument.delete();
+      }
+    })
+    .then(() => {
+      res.json({ message: "scream deleted successfully" });
+    })
+    .catch(err => {
+      console.error(err);
+      res.status(500).json({ error: err.message });
+    });
+};
 //adds comment to a specific scream (post)
 exports.commentOnScream = (req, res) => {
   if (req.body.body === "") {

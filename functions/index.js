@@ -8,6 +8,7 @@ const {
   getAllScreams,
   postScream,
   getScream,
+  deleteScream,
   commentOnScream,
   likeScream,
   unlikeScream
@@ -32,6 +33,8 @@ server.get("/screams", getAllScreams);
 server.post("/scream", FBAuth, postScream);
 //get individual scream(post) along with comments for taht scream
 server.get("/scream/:screamId", getScream);
+//delete a scream (post)
+server.delete("/scream/:screamId", FBAuth, deleteScream);
 //post a comment on a  certain scream
 server.post("/scream/:screamId/comment", FBAuth, commentOnScream);
 //like a scream (post)
