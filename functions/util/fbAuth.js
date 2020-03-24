@@ -12,13 +12,11 @@ exports.FBAuth = (req, res, next) => {
     console.error("could not find token");
     return res.status(403).json({ error: "not authorized" });
   }
-  console.log(idToken);
+
   admin
     .auth()
     .verifyIdToken(idToken)
     .then(decodedToken => {
-      console.log("decToken", decodedToken);
-
       req.user = decodedToken;
 
       return db
@@ -29,7 +27,7 @@ exports.FBAuth = (req, res, next) => {
     })
     .then(data => {
       req.user.handle = data.docs[0].data().handle;
-      console.log("passed auth");
+
       return next();
     })
     .catch(err => {
