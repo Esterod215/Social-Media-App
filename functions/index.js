@@ -8,7 +8,8 @@ const {
   getAllScreams,
   postScream,
   getScream,
-  commentOnScream
+  commentOnScream,
+  likeScream
 } = require("./handlers/screams");
 
 //user imports
@@ -24,12 +25,16 @@ const {
 const { FBAuth } = require("./util/fbAuth");
 
 //scream routes
+
 server.get("/screams", getAllScreams);
-server.post("/screams", FBAuth, postScream);
+//post a scream (post)
+server.post("/scream", FBAuth, postScream);
 //get individual scream(post) along with comments for taht scream
-server.get("/screams/:screamId", getScream);
+server.get("/scream/:screamId", getScream);
 //post a comment on a  certain scream
-server.post("/screams/:screamId/comment", FBAuth, commentOnScream);
+server.post("/scream/:screamId/comment", FBAuth, commentOnScream);
+//like a scream (post)
+server.get("/scream/:screamId/like", FBAuth, likeScream);
 
 //user routes
 server.post("/signup", signup);
