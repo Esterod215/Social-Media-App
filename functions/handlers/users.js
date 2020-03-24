@@ -111,9 +111,10 @@ exports.addUserInfo = (req, res) => {
 //get own user details
 exports.getAuthenticatedUser = (req, res) => {
   let userData = {};
-  db.doc(`/user/${req.user.handle}`)
+  db.doc(`/users/${req.user.handle}`)
     .get()
     .then(doc => {
+      console.log("doc", doc);
       if (doc.exists) {
         userData.credentials = doc.data();
         return db
@@ -123,6 +124,7 @@ exports.getAuthenticatedUser = (req, res) => {
       }
     })
     .then(data => {
+      console.log(data);
       userData.likes = [];
       data.forEach(doc => {
         userData.likes.push(doc.data());
@@ -131,7 +133,7 @@ exports.getAuthenticatedUser = (req, res) => {
     })
     .catch(err => {
       console.error(err);
-      return res.status(500).json({ error: err.code });
+      return res.status(500).json({ error: err.message });
     });
 };
 exports.uploadImage = (req, res) => {
