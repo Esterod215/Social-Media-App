@@ -47,6 +47,7 @@ exports.getScream = (req, res) => {
       screamData.screamId = doc.id;
       return db
         .collection("comments")
+        .orderBy("createdAt", "desc")
         .where("screamId", "==", req.params.screamId)
         .get();
     })
@@ -61,4 +62,7 @@ exports.getScream = (req, res) => {
       console.error(err);
       return res.status(500).json({ error: err.message });
     });
+};
+exports.commentOnScream = (req, res) => {
+  return null;
 };

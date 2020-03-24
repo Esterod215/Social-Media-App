@@ -4,7 +4,12 @@ const express = require("express");
 const server = express();
 
 //scream imports
-const { getAllScreams, postScream, getScream } = require("./handlers/screams");
+const {
+  getAllScreams,
+  postScream,
+  getScream,
+  commentOnScream
+} = require("./handlers/screams");
 
 //user imports
 const {
@@ -21,7 +26,10 @@ const { FBAuth } = require("./util/fbAuth");
 //scream routes
 server.get("/screams", getAllScreams);
 server.post("/screams", FBAuth, postScream);
+//get individual scream(post) along with comments for taht scream
 server.get("/screams/:screamId", getScream);
+//post a comment on a  certain scream
+server.post("/screams/:screamId/comment", FBAuth, commentOnScream);
 
 //user routes
 server.post("/signup", signup);
