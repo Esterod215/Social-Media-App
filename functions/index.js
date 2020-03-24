@@ -9,7 +9,8 @@ const {
   postScream,
   getScream,
   commentOnScream,
-  likeScream
+  likeScream,
+  unlikeScream
 } = require("./handlers/screams");
 
 //user imports
@@ -35,6 +36,8 @@ server.get("/scream/:screamId", getScream);
 server.post("/scream/:screamId/comment", FBAuth, commentOnScream);
 //like a scream (post)
 server.get("/scream/:screamId/like", FBAuth, likeScream);
+//unlike a scream (post)
+server.get("/scream/:screamId/unlike", FBAuth, unlikeScream);
 
 //user routes
 server.post("/signup", signup);

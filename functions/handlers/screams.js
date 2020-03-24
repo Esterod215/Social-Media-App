@@ -90,9 +90,11 @@ exports.commentOnScream = (req, res) => {
       if (!doc.exists) {
         return res.status(404).json({ error: "Scream does not exist" });
       }
-      return db
-        .collection("comments")
-        .add(newComment)
+      return doc.ref
+        .update({ commentCount: doc.data().commentCount + 1 })
+        .then(() => {
+          return db.collection("comments").add(newComment);
+        })
         .then(() => {
           res.status(201).json({ newComment });
         })
@@ -104,7 +106,7 @@ exports.commentOnScream = (req, res) => {
 };
 exports.likeScream = (req, res) => {
   const likeDocument = db
-    .doc("likes")
+    .collection("likes")
     .where("userHandle", "==", req.user.handle)
     .where("screamId", "==", req.params.screamId)
     .limit(1);
@@ -145,9 +147,9 @@ exports.likeScream = (req, res) => {
       return res.status(500).json({ error: err.mesage });
     });
 };
-exports.dislikeScream = (req, res) => {
+exports.unlikeScream = (req, res) => {
   const likeDocument = db
-    .doc("likes")
+    .collection("likes")
     .where("userHandle", "==", req.user.handle)
     .where("screamId", "==", req.params.screamId)
     .limit(1);
@@ -169,7 +171,7 @@ exports.dislikeScream = (req, res) => {
         return res.status(400).json({ error: "scream is not liked yet" });
       } else {
         return db
-          .doc(`/likes/${data.docs[0].data().id}`)
+          .doc(`/likes/${data.docs[0].id}`)
           .delete()
           .then(() => {
             screamData.likeCount--;
