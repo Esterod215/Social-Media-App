@@ -22,7 +22,9 @@ const {
   login,
   uploadImage,
   addUserInfo,
-  getAuthenticatedUser
+  getAuthenticatedUser,
+  getUserDetails,
+  markNotificationsRead
 } = require("./handlers/users");
 
 //middleware
@@ -50,6 +52,9 @@ server.post("/login", login);
 server.post("/user/image", FBAuth, uploadImage);
 server.post("/user", FBAuth, addUserInfo);
 server.get("/user", FBAuth, getAuthenticatedUser);
+//gets the user details for user with specified handle
+server.get("/user/:handle", getUserDetails);
+server.post("/notifications", FBAuth, markNotificationsRead);
 
 exports.api = functions.https.onRequest(server);
 
