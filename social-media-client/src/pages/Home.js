@@ -26,7 +26,7 @@ function Home() {
       <Grid item sm={8} xs={12}>
         {screams.length > 0 ? (
           screams.map(scream => {
-            return <Scream scream={scream} />;
+            return <Scream scream={scream} key={scream.screamId} />;
           })
         ) : (
           <p>Loading ...</p>
