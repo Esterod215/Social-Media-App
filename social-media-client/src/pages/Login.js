@@ -1,12 +1,14 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 import axios from "axios";
-
+//mui imports
 import { withStyles } from "@material-ui/core/styles";
 import { Grid } from "@material-ui/core";
 import { Typography } from "@material-ui/core";
 import { TextField } from "@material-ui/core";
 import { Button } from "@material-ui/core";
+import { CircularProgress } from "@material-ui/core";
 
 const styles = {
   form: {
@@ -16,10 +18,16 @@ const styles = {
     marginTop: "10px"
   },
   button: {
-    marginTop: "20px;"
+    marginTop: "20px;",
+    marginBottom: "10px"
   },
   textField: {
     margin: "10px auto 10px auto"
+  },
+  customError: {
+    color: "red",
+    fontSize: "0.8rem",
+    marginTop: "10px"
   }
 };
 
@@ -28,12 +36,12 @@ function Login(props) {
     email: "",
     password: "",
     loading: false,
-    errors: {}
+    errors: { email: "", general: "", password: "" }
   });
 
   const handleSubmit = e => {
     e.preventDefault();
-    setValues({ ...values, loading: true });
+    setValues({ loading: true });
     const userData = { email: values.email, password: values.password };
     axios
       .post(
@@ -42,17 +50,24 @@ function Login(props) {
       )
       .then(res => {
         console.log(res);
-        setValues({ loading: false });
+        props.history.push("/");
       })
       .catch(err => {
-        setValues({ errors: err.response.data });
+        setValues({ errors: err.response.data, loading: false });
       });
 
     console.log("submitted", values.email, values.password);
-    setValues({ email: "", password: "", errors: {}, loading: false });
+    setValues({
+      ...values,
+      email: "",
+      password: "",
+      errors: { email: "", general: "", password: "" }
+    });
   };
 
   const handleChanges = e => {
+    console.log("b email", values.email);
+    console.log("b password", values.password);
     setValues({ ...values, [e.target.name]: e.target.value });
     console.log("email", values.email);
     console.log("password", values.password);
@@ -92,14 +107,24 @@ function Login(props) {
               error={values.errors.password ? true : false}
               fullWidth
             />
+            {values.errors.general ? (
+              <Typography variant="body2" className={props.classes.customError}>
+                {values.errors.general}
+              </Typography>
+            ) : null}
             <Button
               variant="contained"
               color="primary"
               className={props.classes.button}
               onClick={handleSubmit}
+              disabled={values.loading}
             >
-              Login
+              {values.loading ? <CircularProgress color="white" /> : "Login"}
             </Button>
+            <br />
+            <small>
+              Dont have an account? Signup <Link to="/Signup">here.</Link>
+            </small>
           </form>
         </Grid>
         <Grid item sm />
