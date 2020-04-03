@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 
+import { Link } from "react-router-dom";
+
+import axios from "axios";
+
 //mui imports
 import { withStyles } from "@material-ui/core/styles";
 import { Grid } from "@material-ui/core";
@@ -38,7 +42,8 @@ function Signup(props) {
     errors: {
       email: "",
       password: "",
-      handle: ""
+      handle: "",
+      confirmPassword: ""
     }
   });
 
@@ -49,6 +54,25 @@ function Signup(props) {
   const handleSubmit = e => {
     e.preventDefault();
     setData({ ...formData, loading: true });
+    const newUser = {
+      email: formData.email,
+      password: formData.password,
+      confirmPassword: formData.confirmPassword,
+      handle: formData.handle
+    };
+    axios
+      .post(
+        "https://us-central1-socialapp-2a20a.cloudfunctions.net/api/signup",
+        newUser
+      )
+      .then(res => {
+        console.log(res);
+        setData({ ...formData, loading: false });
+      })
+      .catch(err => {
+        console.log(err.response.data);
+        setData({ ...formData, errors: err.response.data });
+      });
   };
   return (
     <>
@@ -74,7 +98,7 @@ function Signup(props) {
             <TextField
               type="password"
               name="password"
-              label="password"
+              label="Password"
               value={formData.password}
               onChange={handleChanges}
               fullWidth
@@ -89,8 +113,8 @@ function Signup(props) {
               value={formData.confirmPassword}
               onChange={handleChanges}
               fullWidth
-              helperText={formData.errors.password}
-              error={formData.errors.password}
+              helperText={formData.errors.confirmPassword}
+              error={formData.errors.confirmPassword ? true : false}
               className={props.classes.textField}
             />
             <TextField
@@ -101,7 +125,7 @@ function Signup(props) {
               onChange={handleChanges}
               fullWidth
               helperText={formData.errors.password}
-              error={formData.errors.password}
+              error={formData.errors.password ? true : false}
               className={props.classes.textField}
             />
             <Button
@@ -114,6 +138,9 @@ function Signup(props) {
               {formData.loading ? "Loading..." : "Signup!"}
             </Button>
           </form>
+          <p>
+            Already have an account? click <Link to="/login">here</Link>
+          </p>
         </Grid>
         <Grid sm item />
       </Grid>
