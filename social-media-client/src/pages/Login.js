@@ -41,7 +41,7 @@ function Login(props) {
 
   const handleSubmit = e => {
     e.preventDefault();
-    setValues({ loading: true });
+    setValues({ ...values, loading: true });
     const userData = { email: values.email, password: values.password };
     axios
       .post(
@@ -53,24 +53,14 @@ function Login(props) {
         props.history.push("/");
       })
       .catch(err => {
-        setValues({ errors: err.response.data, loading: false });
+        setValues({ ...values, errors: err.response.data, loading: false });
       });
 
     console.log("submitted", values.email, values.password);
-    setValues({
-      ...values,
-      email: "",
-      password: "",
-      errors: { email: "", general: "", password: "" }
-    });
   };
 
   const handleChanges = e => {
-    console.log("b email", values.email);
-    console.log("b password", values.password);
     setValues({ ...values, [e.target.name]: e.target.value });
-    console.log("email", values.email);
-    console.log("password", values.password);
   };
 
   return (
@@ -119,7 +109,7 @@ function Login(props) {
               onClick={handleSubmit}
               disabled={values.loading}
             >
-              {values.loading ? <CircularProgress color="white" /> : "Login"}
+              {values.loading ? <CircularProgress /> : "Login"}
             </Button>
             <br />
             <small>
