@@ -50,13 +50,12 @@ function Login(props) {
       )
       .then(res => {
         console.log(res);
+        localStorage.setItem("FBToken", `Bearer ${res.data.token}`);
         props.history.push("/");
       })
       .catch(err => {
         setValues({ ...values, errors: err.response.data, loading: false });
       });
-
-    console.log("submitted", values.email, values.password);
   };
 
   const handleChanges = e => {

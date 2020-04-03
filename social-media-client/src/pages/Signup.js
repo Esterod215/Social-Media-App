@@ -67,7 +67,9 @@ function Signup(props) {
       )
       .then(res => {
         console.log(res);
+        localStorage.setItem("FBtoken", `Bearer ${res.data.token}`);
         setData({ ...formData, loading: false });
+        props.history.push("/");
       })
       .catch(err => {
         console.log(err.response.data);

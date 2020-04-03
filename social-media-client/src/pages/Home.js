@@ -6,6 +6,7 @@ import { Grid } from "@material-ui/core";
 
 function Home() {
   const [screams, setScreams] = useState([]);
+
   useEffect(() => {
     getScreams();
   }, []);
