@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-import axios from "axios";
 //mui imports
 import { withStyles } from "@material-ui/core/styles";
 import { Grid } from "@material-ui/core";
@@ -9,6 +8,10 @@ import { Typography } from "@material-ui/core";
 import { TextField } from "@material-ui/core";
 import { Button } from "@material-ui/core";
 import { CircularProgress } from "@material-ui/core";
+
+//redux
+import { connect } from "react-redux";
+import { loginUser } from "../redux/actions/UserActions";
 
 const styles = {
   form: {
@@ -34,33 +37,19 @@ const styles = {
 function Login(props) {
   const [values, setValues] = useState({
     email: "",
-    password: "",
-    loading: false,
-    errors: { email: "", general: "", password: "" }
+    password: ""
   });
 
   const handleSubmit = e => {
     e.preventDefault();
-    setValues({ ...values, loading: true });
     const userData = { email: values.email, password: values.password };
-    axios
-      .post(
-        "https://us-central1-socialapp-2a20a.cloudfunctions.net/api/login",
-        userData
-      )
-      .then(res => {
-        console.log(res);
-        localStorage.setItem("FBToken", `Bearer ${res.data.token}`);
-        props.history.push("/");
-      })
-      .catch(err => {
-        setValues({ ...values, errors: err.response.data, loading: false });
-      });
+    props.loginUser(userData, props.history);
   };
 
   const handleChanges = e => {
     setValues({ ...values, [e.target.name]: e.target.value });
   };
+  console.log("props", props);
 
   return (
     <>
@@ -81,8 +70,8 @@ function Login(props) {
               value={values.email}
               onChange={handleChanges}
               fullWidth
-              helperText={values.errors.email}
-              error={values.errors.email ? true : false}
+              helperText={props.UI.errors.email}
+              error={props.UI.errors.email ? true : false}
             />
             <TextField
               id="password"
@@ -92,13 +81,13 @@ function Login(props) {
               className={props.classes.textField}
               value={values.password}
               onChange={handleChanges}
-              helperText={values.errors.password}
-              error={values.errors.password ? true : false}
+              helperText={props.UI.errors.password}
+              error={props.UI.errors.password ? true : false}
               fullWidth
             />
-            {values.errors.general ? (
+            {props.UI.errors.general ? (
               <Typography variant="body2" className={props.classes.customError}>
-                {values.errors.general}
+                {props.UI.errors.general}
               </Typography>
             ) : null}
             <Button
@@ -106,9 +95,9 @@ function Login(props) {
               color="primary"
               className={props.classes.button}
               onClick={handleSubmit}
-              disabled={values.loading}
+              disabled={props.UI.loading}
             >
-              {values.loading ? <CircularProgress /> : "Login"}
+              {props.UI.loading ? <CircularProgress /> : "Login"}
             </Button>
             <br />
             <small>
@@ -122,4 +111,11 @@ function Login(props) {
   );
 }
 
-export default withStyles(styles)(Login);
+const mapStateToProps = state => ({
+  user: state.userReducer,
+  UI: state.UiReducer
+});
+
+export default connect(mapStateToProps, { loginUser })(
+  withStyles(styles)(Login)
+);

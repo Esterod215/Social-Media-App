@@ -36,15 +36,13 @@ const token = localStorage.getItem("FBToken");
 let authenticated = false;
 if (token) {
   const decodedToken = jwtDecode(token);
-  console.log("dectoken", decodedToken);
+
   if (decodedToken.exp * 1000 < new Date()) {
     window.location.href = "/login";
     authenticated = false;
   } else {
     authenticated = true;
   }
-} else {
-  console.log("no token");
 }
 
 function App() {
