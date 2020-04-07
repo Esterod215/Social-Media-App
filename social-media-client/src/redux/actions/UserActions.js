@@ -29,6 +29,32 @@ export const loginUser = (userData, history) => dispatch => {
     });
 };
 
+export const signupUser = (newUserData, history) => dispatch => {
+  dispatch({ type: LOADING_UI });
+  axios
+    .post(
+      "https://us-central1-socialapp-2a20a.cloudfunctions.net/api/signup",
+      newUserData
+    )
+    .then(res => {
+      const FBToken = `Bearer ${res.data.token}`;
+      localStorage.setItem("FBToken", FBToken);
+      axios.defaults.headers.common["Authorization"] = FBToken;
+      dispatch(getUserData());
+      dispatch({ type: CLEAR_ERRORS });
+      history.push("/");
+    })
+    .catch(err => {
+      dispatch({ type: SET_ERRORS, payload: err.response.data });
+    });
+};
+
+export const logoutUser = () => dispatch => {
+  localStorage.removeItem("FBToken");
+  delete axios.defaults.headers.common["Authorization"];
+  dispatch({ type: SET_UNAUTHENTICATED });
+};
+
 export const getUserData = () => dispatch => {
   axios
     .get("https://us-central1-socialapp-2a20a.cloudfunctions.net/api/user")

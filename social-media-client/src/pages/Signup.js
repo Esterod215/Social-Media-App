@@ -1,8 +1,6 @@
 import React, { useState } from "react";
-
+//react router
 import { Link } from "react-router-dom";
-
-import axios from "axios";
 
 //mui imports
 import { withStyles } from "@material-ui/core/styles";
@@ -10,6 +8,10 @@ import { Grid } from "@material-ui/core";
 import { Typography } from "@material-ui/core";
 import { TextField } from "@material-ui/core";
 import { Button } from "@material-ui/core";
+
+//redux imports
+import { connect } from "react-redux";
+import { signupUser } from "../redux/actions/UserActions";
 
 const styles = {
   form: {
@@ -33,18 +35,12 @@ const styles = {
 };
 
 function Signup(props) {
+  console.log("signup props", props);
   const [formData, setData] = useState({
     email: "",
     password: "",
     confirmPassword: "",
-    handle: "",
-    loading: false,
-    errors: {
-      email: "",
-      password: "",
-      handle: "",
-      confirmPassword: ""
-    }
+    handle: ""
   });
 
   const handleChanges = e => {
@@ -60,21 +56,7 @@ function Signup(props) {
       confirmPassword: formData.confirmPassword,
       handle: formData.handle
     };
-    axios
-      .post(
-        "https://us-central1-socialapp-2a20a.cloudfunctions.net/api/signup",
-        newUser
-      )
-      .then(res => {
-        console.log(res);
-        localStorage.setItem("FBtoken", `Bearer ${res.data.token}`);
-        setData({ ...formData, loading: false });
-        props.history.push("/");
-      })
-      .catch(err => {
-        console.log(err.response.data);
-        setData({ ...formData, errors: err.response.data });
-      });
+    props.signupUser(newUser, props.history);
   };
   return (
     <>
@@ -93,8 +75,8 @@ function Signup(props) {
               onChange={handleChanges}
               fullWidth
               label="Email"
-              helperText={formData.errors.email}
-              error={formData.errors.email ? true : false}
+              helperText={props.errors.email}
+              error={props.errors.email ? true : false}
               className={props.classes.textField}
             />
             <TextField
@@ -104,8 +86,8 @@ function Signup(props) {
               value={formData.password}
               onChange={handleChanges}
               fullWidth
-              helperText={formData.errors.password}
-              error={formData.errors.password ? true : false}
+              helperText={props.errors.password}
+              error={props.errors.password ? true : false}
               className={props.classes.textField}
             />
             <TextField
@@ -115,8 +97,8 @@ function Signup(props) {
               value={formData.confirmPassword}
               onChange={handleChanges}
               fullWidth
-              helperText={formData.errors.confirmPassword}
-              error={formData.errors.confirmPassword ? true : false}
+              helperText={props.errors.confirmPassword}
+              error={props.errors.confirmPassword ? true : false}
               className={props.classes.textField}
             />
             <TextField
@@ -126,8 +108,8 @@ function Signup(props) {
               value={formData.handle}
               onChange={handleChanges}
               fullWidth
-              helperText={formData.errors.password}
-              error={formData.errors.password ? true : false}
+              helperText={props.errors.handle}
+              error={props.errors.handle ? true : false}
               className={props.classes.textField}
             />
             <Button
@@ -135,9 +117,9 @@ function Signup(props) {
               color="primary"
               className={props.classes.button}
               onClick={handleSubmit}
-              disabled={formData.loading}
+              disabled={props.loading}
             >
-              {formData.loading ? "Loading..." : "Signup!"}
+              {props.loading ? "Loading..." : "Signup!"}
             </Button>
           </form>
           <p>
@@ -150,4 +132,11 @@ function Signup(props) {
   );
 }
 
-export default withStyles(styles)(Signup);
+const mapStateToProps = state => ({
+  loading: state.UiReducer.loading,
+  errors: state.UiReducer.errors
+});
+
+export default connect(mapStateToProps, { signupUser })(
+  withStyles(styles)(Signup)
+);

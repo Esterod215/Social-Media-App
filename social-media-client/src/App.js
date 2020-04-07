@@ -33,15 +33,12 @@ const theme = createMuiTheme({
 });
 
 const token = localStorage.getItem("FBToken");
-let authenticated = false;
+
 if (token) {
   const decodedToken = jwtDecode(token);
 
   if (decodedToken.exp * 1000 < new Date()) {
     window.location.href = "/login";
-    authenticated = false;
-  } else {
-    authenticated = true;
   }
 }
 
@@ -53,16 +50,8 @@ function App() {
           <NavBar />
           <div className="container">
             <Route exact path="/" component={Home} />
-            <AuthRoute
-              path="/Login"
-              component={Login}
-              authenticated={authenticated}
-            />
-            <AuthRoute
-              path="/Signup"
-              component={Signup}
-              authenticated={authenticated}
-            />
+            <AuthRoute path="/Login" component={Login} />
+            <AuthRoute path="/Signup" component={Signup} />
           </div>
         </Router>
       </div>

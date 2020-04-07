@@ -7,7 +7,7 @@ import {
 } from "../actions/UserActions";
 
 const initialState = {
-  authenticated: true,
+  authenticated: false,
   credentials: {},
   likes: [],
   notifications: []

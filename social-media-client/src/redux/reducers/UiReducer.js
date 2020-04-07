@@ -4,7 +4,13 @@ export const LOADING_UI = "LOADING_UI";
 
 const initialState = {
   loading: false,
-  errors: { email: "", general: "", password: "" }
+  errors: {
+    email: "",
+    general: "",
+    password: "",
+    confirmPassword: "",
+    handle: ""
+  }
 };
 
 const UiReducer = (state = initialState, action) => {
