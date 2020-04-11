@@ -2,15 +2,15 @@ import {
   SET_AUTHENTICATED,
   SET_UNAUTHENTICATED,
   SET_USER,
-  LOADING_USERS,
-  LOADING_UI
+  LOADING_USERS
 } from "../actions/UserActions";
 
 const initialState = {
   authenticated: false,
   credentials: {},
   likes: [],
-  notifications: []
+  notifications: [],
+  loadingUser: false
 };
 
 const userReducer = (state = initialState, action) => {
@@ -28,7 +28,13 @@ const userReducer = (state = initialState, action) => {
         authenticated: true,
         credentials: action.payload.credentials,
         likes: action.payload.likes,
-        notifications: action.payload.notifications
+        notifications: action.payload.notifications,
+        loadingUser: false
+      };
+    case LOADING_USERS:
+      return {
+        ...state,
+        loadingUser: true
       };
     default:
       return state;

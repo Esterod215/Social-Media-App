@@ -56,11 +56,42 @@ export const logoutUser = () => dispatch => {
 };
 
 export const getUserData = () => dispatch => {
+  dispatch({ type: LOADING_USERS });
   axios
     .get("https://us-central1-socialapp-2a20a.cloudfunctions.net/api/user")
     .then(res => {
       console.log("user data", res);
       dispatch({ type: SET_USER, payload: res.data });
+    })
+    .catch(err => {
+      console.log(err);
+    });
+};
+
+export const uploadImage = formData => dispatch => {
+  dispatch({ type: LOADING_USERS });
+  axios
+    .post(
+      "https://us-central1-socialapp-2a20a.cloudfunctions.net/api/user/image",
+      formData
+    )
+    .then(() => {
+      dispatch(getUserData());
+    })
+    .catch(err => {
+      console.log(err);
+    });
+};
+
+export const editDetails = newDetails => dispatch => {
+  dispatch({ type: LOADING_USERS });
+  axios
+    .post(
+      "https://us-central1-socialapp-2a20a.cloudfunctions.net/api/user/",
+      newDetails
+    )
+    .then(() => {
+      dispatch(getUserData());
     })
     .catch(err => {
       console.log(err);
